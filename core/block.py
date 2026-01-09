@@ -1,16 +1,17 @@
 from time import time
-from printable import Printable
+from .printable import Printable
 import hashlib
 import json
 
 
 class Block(Printable):
-    def __init__(self, index, previous_hash, transactions, proof, timestamp=None):
+    def __init__(self, index, previous_hash, transactions, proof, timestamp=None, pow_attempts=None):
         self.index = index
         self.previous_hash = previous_hash
         self.transactions = transactions
         self.proof = proof
         self.timestamp = timestamp if timestamp else time()
+        self.pow_attempts = pow_attempts or []
 
     def __repr__(self):
         return str(self.__dict__)
@@ -18,10 +19,11 @@ class Block(Printable):
     def calculate_hash(self):
         """Calculate hash of block contents."""
         # Convert block to dictionary and sort to ensure consistent ordering
-        block_string = json.dumps(self.to_dict(include_hash=False), sort_keys=True)
+        # Exclude pow_attempts as it's metadata, not part of block content
+        block_string = json.dumps(self.to_dict(include_hash=False, include_pow_attempts=False), sort_keys=True)
         return hashlib.sha256(block_string.encode()).hexdigest()
 
-    def to_dict(self, include_hash=True):
+    def to_dict(self, include_hash=True, include_pow_attempts=True):
         """Convert block to dictionary, optionally including its hash."""
         dict_block = {
             "index": self.index,
@@ -30,6 +32,8 @@ class Block(Printable):
             "proof": self.proof,
             "timestamp": self.timestamp,
         }
+        if include_pow_attempts:
+            dict_block["pow_attempts"] = self.pow_attempts
         if include_hash:
             dict_block["hash"] = self.calculate_hash()
         return dict_block

@@ -1,7 +1,7 @@
 import os
 from flask import Flask, jsonify, request, render_template, session, redirect, url_for
 from functools import wraps
-from node import Node
+from core.node import Node
 
 app = Flask(__name__)
 app.secret_key = os.environ.get(
@@ -15,10 +15,11 @@ def login_required(f):
     def decorated_function(*args, **kwargs):
         if "username" not in session:
             return redirect(url_for("login"))
-        if session["username"] not in nodes:
-            # Re-initialize node if it was lost (e.g., server restart)
-            nodes[session["username"]] = Node()
-            nodes[session["username"]].initialize_blockchain(session["username"])
+        username = session["username"]
+        # Re-initialize node if it was lost or blockchain is None
+        if username not in nodes or nodes[username].blockchain is None:
+            nodes[username] = Node()
+            nodes[username].initialize_blockchain(username)
         return f(*args, **kwargs)
 
     return decorated_function
@@ -133,9 +134,9 @@ def get_pow_attempts(index):
     node = nodes[session["username"]]
     if index < len(node.blockchain.chain):
         block = node.blockchain.chain[index]
-        if hasattr(block, "pow_attempts"):
+        if block.pow_attempts:
             return jsonify(block.pow_attempts), 200
-        # If no attempts stored, return simulated data
+        # If no attempts stored (genesis or old blocks), return simulated data
         return (
             jsonify(
                 [{"proof": block.proof, "hash": block.calculate_hash(), "valid": True}]
@@ -146,5 +147,5 @@ def get_pow_attempts(index):
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 4747))
     app.run(host="0.0.0.0", port=port)

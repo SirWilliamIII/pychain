@@ -1,9 +1,9 @@
 from uuid import uuid4
 import json
 import os
-from blockchain import Blockchain
-from verification import Verification
-from db_helper import get_db_path, save_data, load_data
+from .blockchain import Blockchain
+from .verification import Verification
+from .db_helper import get_db_path, save_data, load_data
 
 
 class Node:

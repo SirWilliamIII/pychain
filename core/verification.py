@@ -1,4 +1,4 @@
-from hash_helpers import hash_string_256, hash_block
+from .hash_helpers import hash_string_256, hash_block
 import hashlib
 
 

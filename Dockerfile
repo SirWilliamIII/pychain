@@ -1,36 +1,30 @@
-# Use Python 3.11 slim image as base
-FROM python:3.13.1-slim
+# PyChain Dockerfile
+FROM python:3.13-slim
 
-# Set working directory in container
 WORKDIR /app
 
-# Set environment variables
+# Environment
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PORT=5000
+    PORT=4747 \
+    DATA_DIR=/app/data
 
-# Install system dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    gcc \
-    python3-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements file
+# Copy and install dependencies
 COPY requirements.txt .
-
-# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy project files
-COPY . .
+# Copy application code
+COPY app.py ./
+COPY core/ ./core/
+COPY static/ ./static/
+COPY templates/ ./templates/
 
-# Create a non-root user and switch to it
-RUN useradd -m appuser && chown -R appuser:appuser /app
+# Create data directory and non-root user
+RUN mkdir -p /app/data && \
+    useradd -m appuser && \
+    chown -R appuser:appuser /app
 USER appuser
 
-# Expose the port the app runs on
-EXPOSE 5000
+EXPOSE 4747
 
-# Command to run the application
-CMD ["python", "server.py"] 
+CMD ["python", "app.py"]

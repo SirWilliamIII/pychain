@@ -2,13 +2,13 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+.claude/
 # C extensions
 *.so
 
 .idea/*
 .qodo/*
-
+.vscode/
 
 # Distribution / packaging
 .Python
@@ -183,6 +183,7 @@ cython_debug/
 
 node.txt
 blockchain.txt
+data/
 .DS_Store
 .python-version
 

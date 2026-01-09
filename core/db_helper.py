@@ -1,17 +1,26 @@
 import os
 import json
 
+# Data directory - configurable via environment variable
+DATA_DIR = os.environ.get("DATA_DIR", "./data")
+
 # In-memory fallback storage for Heroku
 MEMORY_STORAGE = {
     'blockchain': None,
     'node': None
 }
 
+def _ensure_data_dir():
+    """Ensure data directory exists."""
+    if not os.environ.get("DATABASE_URL"):  # Not on Heroku
+        os.makedirs(DATA_DIR, exist_ok=True)
+
 def get_db_path(filename):
     """Get the appropriate database path based on environment."""
     if os.environ.get("DATABASE_URL"):  # We're on Heroku
         return os.path.join("/tmp", filename)
-    return filename
+    _ensure_data_dir()
+    return os.path.join(DATA_DIR, filename)
 
 def save_data(filename, data):
     """Save data to file or memory depending on environment."""
@@ -37,5 +46,5 @@ def load_data(filename):
                     return json.load(f)
                 except json.JSONDecodeError:
                     return f.read().strip()
-    except (IOError, IndexError):
+    except (IOError, IndexError, FileNotFoundError):
         return None

@@ -1,11 +1,11 @@
 import json
 from functools import reduce
 
-from hash_helpers import hash_block
-from block import Block
-from transaction import Transaction
-from verification import Verification
-from db_helper import get_db_path, save_data, load_data
+from .hash_helpers import hash_block
+from .block import Block
+from .transaction import Transaction
+from .verification import Verification
+from .db_helper import get_db_path, save_data, load_data
 
 
 MINING_REWARD = 10
@@ -36,6 +36,7 @@ class Blockchain:
                         converted_transaction,
                         block["proof"],
                         block["timestamp"],
+                        block.get("pow_attempts", []),
                     )
                     updated_blockchain.append(updated_block)
                 self.chain = updated_blockchain
@@ -62,6 +63,7 @@ class Blockchain:
                         [tx.__dict__ for tx in block_el.transactions],
                         block_el.proof,
                         block_el.timestamp,
+                        block_el.pow_attempts,
                     )
                     for block_el in self.chain
                 ]
@@ -168,7 +170,7 @@ class Blockchain:
         reward_transaction = Transaction("MINING", self.hosting_node_id, MINING_REWARD)
         copied_transactions = self.open_transactions[:]
         copied_transactions.append(reward_transaction)
-        block = Block(len(self.chain), hashed_block, copied_transactions, proof)
+        block = Block(len(self.chain), hashed_block, copied_transactions, proof, pow_attempts=self.last_pow_attempts)
         self.chain.append(block)
         self.open_transactions = []
         self.save_data()

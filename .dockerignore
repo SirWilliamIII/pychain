@@ -1,0 +1,27 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.venv
+.env
+
+# IDE
+.vscode
+.idea
+*.swp
+
+# Claude/AI
+.claude
+CLAUDE.md
+
+# Data files (will be created fresh in container)
+blockchain.txt
+node.txt
+
+# Misc
+*.md
+!README.md
