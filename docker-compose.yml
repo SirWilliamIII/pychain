@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  pychain:
+    build: .
+    container_name: pychain-app
+    ports:
+      - "4747:4747"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - PORT=4747
+      - SECRET_KEY=${SECRET_KEY:-dev_key_123}
+    restart: unless-stopped
+    networks:
+      - pychain-network
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: pychain-tunnel
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN}
+    restart: unless-stopped
+    networks:
+      - pychain-network
+    depends_on:
+      - pychain
+
+networks:
+  pychain-network:
+    driver: bridge
+
+volumes:
+  data:
